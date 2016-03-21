@@ -59,7 +59,7 @@ public class NoLash {
         ps.close();
       }
     } finally {
-      br.close(); 
+      br.close();
     }
   }
 
@@ -82,7 +82,7 @@ public class NoLash {
       }
 
       // update commands if needed
-      if ("G0".equals(command) || "G1".equals(command)) {
+      if ("G0".equals(command) || "G1".equals(command) || "G00".equals(command) || "G01".equals(command)) {
         line = repairCommand(x, y, line, out);
       } else if ("G28".equals(command)) {
         // save new positions for x and y
@@ -97,7 +97,6 @@ public class NoLash {
       }
       // write the (potentially adjusted) gcode
       out.println(line);
-      
     }
   }
 
@@ -120,10 +119,10 @@ public class NoLash {
   // this routine calculates the new position in the X or Y direction (depending of the axis parameter)
   // axis should be "X" or "Y". Returns updated line and maintains mCountermeasure, updates axis state
   private String repairCommand(Axis axis, String line) {
-    
+
     // get the location of the axis position command
     int intCmd = line.indexOf(axis.mName);
-    
+
     // if the axis does not move during this command then do nothing
     if (intCmd == -1) {
       return line;
@@ -141,9 +140,11 @@ public class NoLash {
       double calc = axis.mPos + axis.mLash * axis.mDir; // calculate countermeasure position
       // add to 'countermeasure' string
       if (mCountermeasure.length() == 0) {
-        mCountermeasure = "G1";
+        mCountermeasure = "G01";
       }
       mCountermeasure += " " + axis.mName + calc;
+
+      System.out.println("(Direction Changed)");
     }
     axis.mPos = newPos;
 
@@ -206,4 +207,3 @@ public class NoLash {
     }
   }
 }
-
